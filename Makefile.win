@@ -1,0 +1,4 @@
+SDL2_DIR = C:\tmp\SDL2_64_Todo
+
+all:
+	g++ -o snake main.cpp LTexture.cpp  -lSDL2_ttf -lSDL2_image -I$(SDL2_DIR)\include\SDL2 -L$(SDL2_DIR)\lib -lmingw32 -lSDL2main -lSDL2

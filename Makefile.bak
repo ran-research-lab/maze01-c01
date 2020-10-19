@@ -1,0 +1,2 @@
+all:
+	g++ -o bars main.cpp LTexture.cpp `sdl2-config --cflags --libs` -lSDL2_ttf -lSDL2_image
