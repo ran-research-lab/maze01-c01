@@ -122,9 +122,9 @@ public:
 	bool isAtDest() const { return ( dest.first == pos.first and dest.second == pos.second); }
 	void move() {
 		int stPos = pos.first + width * pos.second;
-		std::cout << stPos << std::endl;	
-		std::cout << st << std::endl;
-		std::cout << pos.first << " " << pos.second << std::endl;
+		//std::cout << stPos << std::endl;	
+		//std::cout << st << std::endl;
+		//std::cout << pos.first << " " << pos.second << std::endl;
 		if (isAtDest()){
 			// exit(1);
 			// std::cout << "YESS" << std::endl;
@@ -133,47 +133,39 @@ public:
 				st[ppos.first + width * ppos.second] = 'p';
 				S.pop();
 			}
-			std::cout << toString() << std::endl;
+			//std::cout << toString() << std::endl;
 		}
 		else if (st[stPos+1] != '*' && st[stPos+1] != 'v') {
-			std::cout << "right" << std::endl;
+			//std::cout << "right" << std::endl;
 			st[stPos+1] = 'v';
 			S.push(pos);
 			pos.first++;
 		}
 		else if (st[stPos-width] != '*' && st[stPos-width] != 'v') {
-			std::cout << "up" << std::endl;
+			//std::cout << "up" << std::endl;
 			st[stPos-width] = 'v';
 			S.push(pos);
 			pos.second--;
 		}
 		else if (st[stPos-1] != '*' && st[stPos-1] != 'v') {
-			std::cout << "left" << std::endl;
+			//std::cout << "left" << std::endl;
 			st[stPos-1] = 'v';
 			S.push(pos);
 			pos.first--;
 		}
 		else if (st[stPos+width] != '*' && st[stPos+width] != 'v') {
-			std::cout << "down" << std::endl;
+			//std::cout << "down" << std::endl;
 			st[stPos+width] = 'v';
 			S.push(pos);
 			pos.second++;
 		}
 		else {
-			std::cout << "popping...." << std::endl;
+			//std::cout << "popping...." << std::endl;
 			pos = S.top();
 			S.pop();
 		}
 	}
 
-	// std::vector<iip> getPath() {
-	// 	std::vector<iip> path;
-	// 	while(!S.empty()) {
-	// 		path.push_back(S.top());
-	// 		S.pop();
-	// 	}
-	// 	return path;
-	// }
 
 	std::string toString() const {
 		int fromPos = 0;
