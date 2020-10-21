@@ -1,1 +1,1 @@
-SDL for illustrating breadth first search in a maze
+SDL for illustrating **depth** first search in a maze
