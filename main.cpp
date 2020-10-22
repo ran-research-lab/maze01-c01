@@ -88,13 +88,16 @@ public:
 
 class maze {
 private:
-	std::string st;
-	std::pair<int,int> origin;
-	std::pair<int,int> dest;
-	std::pair<int,int> pos;
-	int width, height;
-	std::stack<iip> S;
+	std::string st;             // contains the maze
+	std::pair<int,int> origin;  // starting coordinate
+	std::pair<int,int> dest;    // destination coordinate
+	std::pair<int,int> pos;     // current position
+	int width, height;          // width and height of maze
+	std::stack<iip> S;          // stack used during exploration
 public:
+    // constructor, which given the name of the file that contains
+    // the maze, reads the info and initializes most of the data
+    // members
 	maze(const std::string& fileName) {
 		std::ifstream inFile(fileName);
 		std::string tmp;
@@ -104,69 +107,67 @@ public:
 			exit(1);
 		}
 
-		
 		inFile >> width >> height;
-		std::cout << height << std::endl;
 		inFile >> origin.first >> origin.second;
 		pos = origin;
 		inFile >> dest.first >> dest.second;
-		st = "";
 
+		st = "";
 		for (int i = 0; i < height; i++) {
 			inFile >> tmp;
-			std::cout << tmp << std::endl;
 			st = tmp + st;
 		}
 	}
-
+    // returns true if the position is the destination
 	bool isAtDest() const { return ( dest.first == pos.first and dest.second == pos.second); }
+
+	// Moves one to the right, up, left or down if possible, if
+	// not possible then backtracks using the stack
 	void move() {
 		int stPos = pos.first + width * pos.second;
-		//std::cout << stPos << std::endl;	
-		//std::cout << st << std::endl;
-		//std::cout << pos.first << " " << pos.second << std::endl;
+
+
 		if (isAtDest()){
-			// exit(1);
-			// std::cout << "YESS" << std::endl;
+		    // empty the stack while writing a 'p' to each
+		    // coordinat read from the stack
 			while (!S.empty()) {
 				iip ppos = S.top();
 				st[ppos.first + width * ppos.second] = 'p';
 				S.pop();
 			}
-			//std::cout << toString() << std::endl;
 		}
 		else if (st[stPos+1] != '*' && st[stPos+1] != 'v') {
-			//std::cout << "right" << std::endl;
+		    // move right
 			st[stPos+1] = 'v';
 			S.push(pos);
 			pos.first++;
 		}
 		else if (st[stPos-width] != '*' && st[stPos-width] != 'v') {
-			//std::cout << "up" << std::endl;
+            // move up
 			st[stPos-width] = 'v';
 			S.push(pos);
 			pos.second--;
 		}
 		else if (st[stPos-1] != '*' && st[stPos-1] != 'v') {
-			//std::cout << "left" << std::endl;
+            // move left
 			st[stPos-1] = 'v';
 			S.push(pos);
 			pos.first--;
 		}
 		else if (st[stPos+width] != '*' && st[stPos+width] != 'v') {
-			//std::cout << "down" << std::endl;
+            // move down
 			st[stPos+width] = 'v';
 			S.push(pos);
 			pos.second++;
 		}
 		else {
-			//std::cout << "popping...." << std::endl;
+            // backtrack
 			pos = S.top();
 			S.pop();
 		}
 	}
 
-
+    // formats the maze as a table
 	std::string toString() const {
 		int fromPos = 0;
 		std::string res;
@@ -176,11 +177,14 @@ public:
 		}
 		return res;
 	}
+
+	// just a getter for the string
 	const std::string &getSt() const {return st; }
 	int getWidth() const {return width; }
 	int getHeight() const {return height; }
-	const iip &getPos() const {return pos; }
 
+	// getter for the position in the maze
+	const iip &getPos() const {return pos; }
 
 };
 
@@ -307,29 +311,27 @@ void drawPoint(SDL_Renderer* renderer, const iip &p, const SDL_Color& color){
 	SDL_RenderFillRect( gRenderer, &fillRect );
 }
 
+// Draws the entire maze
+
 void drawMaze(SDL_Renderer* renderer, const maze &m){
 	const std::string mazeSt = m.getSt();
+    int mazeWidth = m.getWidth();
+
 	for(int i = 0; i < mazeSt.length(); i++) {
+        iip tmppos(i % mazeWidth,i / mazeWidth);
 		if (mazeSt[i] == '*') 
-			drawPoint(renderer, iip(i % m.getWidth(), i / m.getWidth()), SDL_COLOR_BLACK);
+			drawPoint(renderer, tmppos, SDL_COLOR_BLACK);
 		else if (mazeSt[i] == 'p') 
-			drawPoint(renderer, iip(i % m.getWidth(), i / m.getWidth()), SDL_COLOR_GREEN);
+			drawPoint(renderer, tmppos, SDL_COLOR_GREEN);
 	}
 	const iip pos = m.getPos();
 	drawPoint(renderer, pos, SDL_COLOR_RED);
 
 }
 
-
-
-
+// Draw the grid
 void drawAxis(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 0,0,0, 255);
-    // int i = 0;
-    // int delta = tickSeparation *   width / static_cast<float>(maxX);
-    // int label = 0;
-    // int y2 = y + height;
-    // int tickHeight = .05 * height;
 
     for (int i = 0; i <= GRID_WIDTH; i++) {
         SDL_RenderDrawLine(renderer, i * xf, 0, i* xf, SCREEN_HEIGHT );
@@ -337,30 +339,27 @@ void drawAxis(SDL_Renderer* renderer) {
     for (int i = 0; i <= GRID_HEIGHT; i++) {
         SDL_RenderDrawLine(renderer, 0, i * yf, SCREEN_WIDTH, i * yf );
     }
-
-
 }
 
 
 int main( int argc, char* args[] ) {
 
+    // the maze object
     maze myMaze("maze02.txt");
-    std::cout << myMaze.toString() <<  std::endl;
 
+    // just printing after reading to verify content
+    std::cout << myMaze.toString() <<  std::endl;
 	
     // a time object to keep track of time
 	Timer delta;
 
-	// this variable keeps track of the ticks the last time we entered
-	// the game loop
+	// keeps track of the ticks the last time we entered the game loop
 	int prevTicks = 0;
 
 
     // compute the number of pixels per grid square
-    // we will need these for paiting the snake and apple
     xf = SCREEN_WIDTH  / GRID_WIDTH;
     yf = SCREEN_HEIGHT / GRID_HEIGHT; 
-
 
 	//Start up SDL and create window
 	if( !init() ) {
@@ -378,13 +377,13 @@ int main( int argc, char* args[] ) {
 			//Event handler
 			SDL_Event e;
 			delta.start();
+
 			//While application is running
 			while( !quit ) {
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 ) {
 					//User requests quit
 					if( e.type == SDL_QUIT ) { quit = true;}
-
 				}
 
 				//Clear screen
