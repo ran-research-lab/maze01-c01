@@ -184,54 +184,6 @@ public:
 
 };
 
-// A class to represent the snake
-class snake {
-private:
-    // A snake is represented by a vector of the positions of its parts.
-    // It starts with just one piece at coordinate (2,1)
-    std::vector<iip> V{iip(2,1)};
-
-public:
-    // function appleCollision:
-    //    If the head of the snake is in the same position as
-    //    the apple, we extend the snake's tail and return true.
-    bool appleCollision(const iip& apple, const iip& last) {
-        if (apple.first == V[0].first and apple.second == V[0].second) {
-            V.push_back(last);
-            return true;
-        }
-        return false;
-    }
-
-    // function move:
-    //    Given the coordinate of the apple, and the direction of movement
-    //    modifies the snake chunks.
-    int move(const iip& apple, char direction) {
-        iip last = V[V.size()-1];
-
-        // remove the last element
-        V.erase(V.begin()+V.size()-1);
-
-        iip head = V[0];
-
-        if (direction == 'R') head.first++;
-        else if (direction == 'L') head.first--;
-        else if (direction == 'U') head.second++;
-        else if (direction == 'D') head.second--;
-
-        // insert at the first position
-        V.insert(V.begin(),iip(head));
-
-        return appleCollision(apple, last);
-    }
-
-    // function getV:
-    //    Just a getter for the vector of 2D coordinates.
-    const std::vector<iip> & getV() const {
-        return V;
-    }
-};
-
 
 // function init:
 //    Initializes several of the structures needed by SDL.
@@ -366,12 +318,6 @@ void drawMaze(SDL_Renderer* renderer, const maze &m){
 	const iip pos = m.getPos();
 	drawPoint(renderer, pos, SDL_COLOR_RED);
 
-	// if (m.isAtDest()) {
-	// 	std::vector<iip> path = m.getPath();
-	// 	for (auto e: path) {
-	// 		drawPoint(renderer, e, SDL_COLOR_GREEN);
-	// 	}
-	// }
 }
 
 
@@ -397,13 +343,10 @@ void drawAxis(SDL_Renderer* renderer) {
 
 
 int main( int argc, char* args[] ) {
-	// the snake object
-    snake aSnake;
+
     maze myMaze("maze02.txt");
     std::cout << myMaze.toString() <<  std::endl;
 
-    // the apple is just a random coordinate
-    iip apple(rand()%(GRID_WIDTH-1) + 1,rand()%(GRID_HEIGHT-1) + 1);
 	
     // a time object to keep track of time
 	Timer delta;
@@ -411,12 +354,7 @@ int main( int argc, char* args[] ) {
 	// this variable keeps track of the ticks the last time we entered
 	// the game loop
 	int prevTicks = 0;
-	
-	// the key pressed by the user, we initialize to R
-	char key = 'R';
 
-	// a temporary vector for reading the data vector of the snake
-    std::vector<iip> tmpV;
 
     // compute the number of pixels per grid square
     // we will need these for paiting the snake and apple
@@ -447,45 +385,18 @@ int main( int argc, char* args[] ) {
 					//User requests quit
 					if( e.type == SDL_QUIT ) { quit = true;}
 
-					else if (e.type == SDL_KEYDOWN ) {
-						if ( e.key.keysym.sym== SDLK_q)      quit = true;
-						else if ( e.key.keysym.sym== SDLK_h) key = 'L';
-						else if ( e.key.keysym.sym== SDLK_l) key = 'R';
-						else if ( e.key.keysym.sym== SDLK_j) key = 'D';
-						else if ( e.key.keysym.sym== SDLK_k) key = 'U';
-					}
 				}
 
 				//Clear screen
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gRenderer );
 
-                int result = 0;
-
                 // this block decides if it is time to move. We move
                 // approximately CLOCK_PERIOD ticks
                 if (prevTicks / CLOCK_PERIOD < delta.get_ticks()/CLOCK_PERIOD) {
-                	// if(!myMaze.isAtDest()) {
                 		myMaze.move();
-                	// }
-                	// else {
-                		//
-                	// }
-                    result = 0; //aSnake.move(apple,key);
-                    if (result) {
-                        apple.first  = rand()%(GRID_WIDTH-1) + 1;
-                        apple.second = rand()%(GRID_HEIGHT-1) + 1;
-                    }
                 }
                 prevTicks  = delta.get_ticks();
-
-				// read the list of positions of the snake and draw them
-				tmpV = aSnake.getV();
-				// for (int i = 0; i < tmpV.size(); i++)
-					// drawPoint(gRenderer, tmpV[i], SDL_COLOR_BLACK);
-
-                // draw the apple
-				drawPoint(gRenderer, apple, SDL_COLOR_RED);
 
 				drawAxis(gRenderer);
 				drawMaze(gRenderer, myMaze);
